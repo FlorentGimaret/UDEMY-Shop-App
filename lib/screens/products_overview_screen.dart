@@ -6,6 +6,7 @@ import '../widgets/products_grid.dart';
 import '../widgets/badge.dart';
 import '../widgets/app_drawer.dart';
 import '../providers/cart.dart';
+import '../providers/products.dart';
 
 enum FilterOptions {
   Favorites,
@@ -19,6 +20,42 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavorites = false;
+  // var _isInit = true;
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // WON'T WORK (can't use of(context) in initState()) (workarounds below)
+    // Provider.of<Products>(context).fetchAndSetProducts();
+
+    // WORKAROUND 1 : listen: false
+    setState(() {
+      _isLoading = true;
+    });
+    Provider.of<Products>(context, listen: false).fetchAndSetProducts().then(
+      (_) {
+        setState(() {
+          _isLoading = false;
+        });
+      },
+    );
+
+    // WORKAROUND 2
+    // Future.delayed(Duration.zero).then((_) {
+    //   Provider.of<Products>(context).fetchAndSetProducts();
+    // });
+  }
+
+  // WORKAROUND 3
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   if (_isInit) {
+  //     Provider.of<Products>(context).fetchAndSetProducts();
+  //   }
+  //   _isInit = false;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +100,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsGrid(_showOnlyFavorites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }
