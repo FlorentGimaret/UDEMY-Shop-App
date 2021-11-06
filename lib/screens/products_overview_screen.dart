@@ -52,7 +52,14 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   // void didChangeDependencies() {
   //   super.didChangeDependencies();
   //   if (_isInit) {
-  //     Provider.of<Products>(context).fetchAndSetProducts();
+  //     setState(() {
+  //      _isLoading = true;
+  //     });
+  //     Provider.of<Products>(context).fetchAndSetProducts().then((_) {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //     });
   //   }
   //   _isInit = false;
   // }
