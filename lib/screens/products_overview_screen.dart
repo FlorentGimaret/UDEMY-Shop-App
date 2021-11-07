@@ -30,9 +30,8 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     // Provider.of<Products>(context).fetchAndSetProducts();
 
     // WORKAROUND 1 : listen: false
-    setState(() {
-      _isLoading = true;
-    });
+    // (don't need setState() because it happens before build runs)
+    _isLoading = true;
     Provider.of<Products>(context, listen: false).fetchAndSetProducts().then(
       (_) {
         setState(() {
