@@ -25,23 +25,28 @@ class Product with ChangeNotifier {
   Future<void> toggleFavoriteStatus() async {
     final url = Uri.https(
       'flutter-update-f9426-default-rtdb.europe-west1.firebasedatabase.app',
-      '/products/$id',
+      '/products/$id.json',
     );
 
+    final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
 
-    final response = await http.patch(
-      url,
-      body: json.encode({
-        'isFavorite': isFavorite,
-      }),
-    );
+    try {
+      final response = await http.patch(
+        url,
+        body: json.encode({
+          'isFavorite': isFavorite,
+        }),
+      );
 
-    if (response.statusCode >= 400) {
-      isFavorite = !isFavorite;
+      if (response.statusCode >= 400) {
+        throw HttpException('Could not update the favorite status.');
+      }
+    } catch (error) {
+      isFavorite = oldStatus;
       notifyListeners();
-      throw HttpException('Could not update the favorite status.');
+      throw error;
     }
   }
 }
