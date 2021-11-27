@@ -21,6 +21,9 @@ class OrderItem {
 
 class Orders with ChangeNotifier {
   List<OrderItem> _orders = [];
+  final String authToken;
+
+  Orders(this.authToken, this._orders);
 
   List<OrderItem> get orders {
     return [..._orders];
@@ -30,6 +33,7 @@ class Orders with ChangeNotifier {
     final url = Uri.https(
       'flutter-update-f9426-default-rtdb.europe-west1.firebasedatabase.app',
       '/orders.json',
+      {'auth': authToken},
     );
 
     try {
@@ -72,6 +76,7 @@ class Orders with ChangeNotifier {
     final url = Uri.https(
       'flutter-update-f9426-default-rtdb.europe-west1.firebasedatabase.app',
       '/orders.json',
+      {'auth': authToken},
     );
 
     final dateTime = DateTime.now();

@@ -41,7 +41,12 @@ class Products with ChangeNotifier {
     //       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
     // ),
   ];
-  var _showFavoritesOnly = false;
+  // var _showFavoritesOnly = false;
+
+  final String authToken;
+  final String userId;
+
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     // if (_showFavoritesOnly) {
@@ -68,10 +73,18 @@ class Products with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  Future<void> fetchAndSetProducts() async {
-    final url = Uri.https(
+  // Optional positional arguments
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    final filterString = filterByUser
+        ? {
+            'orderBy': '"creatorId"',
+            'equalTo': '"$userId"',
+          }
+        : {};
+    var url = Uri.https(
       'flutter-update-f9426-default-rtdb.europe-west1.firebasedatabase.app',
       '/products.json',
+      {'auth': authToken, ...filterString},
     );
 
     try {
@@ -79,6 +92,14 @@ class Products with ChangeNotifier {
 
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       if (extractedData == null) return;
+
+      url = Uri.https(
+        'flutter-update-f9426-default-rtdb.europe-west1.firebasedatabase.app',
+        'userFavorites/$userId.json',
+        {'auth': authToken},
+      );
+      final favoriteResponse = await http.get(url);
+      final favoriteData = json.decode(favoriteResponse.body);
 
       final List<Product> loadedProducts = [];
       extractedData.forEach((prodId, prodData) {
@@ -89,7 +110,8 @@ class Products with ChangeNotifier {
             description: prodData['description'],
             price: prodData['price'],
             imageUrl: prodData['imageUrl'],
-            isFavorite: prodData['isFavorite'],
+            isFavorite:
+                favoriteData == null ? false : favoriteData[prodId] ?? false,
           ),
         );
       });
@@ -105,6 +127,7 @@ class Products with ChangeNotifier {
     final url = Uri.https(
       'flutter-update-f9426-default-rtdb.europe-west1.firebasedatabase.app',
       '/products.json',
+      {'auth': authToken},
     );
 
     try {
@@ -115,7 +138,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavorite': product.isFavorite,
+          'creatorId': userId,
         }),
       );
 
@@ -142,6 +165,7 @@ class Products with ChangeNotifier {
       final url = Uri.https(
         'flutter-update-f9426-default-rtdb.europe-west1.firebasedatabase.app',
         '/products/$id.json',
+        {'auth': authToken},
       );
 
       try {
@@ -174,6 +198,7 @@ class Products with ChangeNotifier {
     final url = Uri.https(
       'flutter-update-f9426-default-rtdb.europe-west1.firebasedatabase.app',
       '/products/$id.json',
+      {'auth': authToken},
     );
 
     final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
