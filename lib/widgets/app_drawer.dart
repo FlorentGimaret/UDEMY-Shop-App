@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../screens/orders_screen.dart';
 import '../screens/user_products_screen.dart';
+import '../providers/auth.dart';
 
 class AppDrawer extends StatelessWidget {
   Widget buildListTile(String title, IconData icon, Function tapHandler) {
@@ -54,6 +56,16 @@ class AppDrawer extends StatelessWidget {
             () {
               Navigator.of(context)
                   .pushReplacementNamed(UserProductsScreen.routeName);
+            },
+          ),
+          Divider(),
+          buildListTile(
+            'Logout',
+            Icons.exit_to_app,
+            () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushReplacementNamed('/');
+              Provider.of<Auth>(context, listen: false).logout();
             },
           ),
         ],
